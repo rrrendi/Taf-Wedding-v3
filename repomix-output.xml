@@ -6328,7 +6328,24 @@ window.tafToast = function (type, message) {
 
         {{-- KANAN: Riwayat Pembayaran & WhatsApp --}}
         <div>
-            <div class="card" x-data="{ open: {{ $errors->any() ? 'true' : 'false' }} }">
+            <div class="card" x-data="{
+                    open: {{ $errors->any() ? 'true' : 'false' }},
+                    jenis: '',
+                    jumlahRaw: '',
+                    jumlahFormatted: '',
+                    sisa: {{ (int) $pemesanan->sisa }},
+                    autoFillJumlah() {
+                        // Pelunasan selalu pas sesuai sisa tagihan, sama seperti di halaman klien
+                        let nominal = this.jenis === 'pelunasan' ? this.sisa : 0;
+                        this.jumlahRaw = nominal ? String(nominal) : '';
+                        this.jumlahFormatted = nominal ? new Intl.NumberFormat('id-ID').format(nominal) : '';
+                    },
+                    formatRupiah(e) {
+                        let angka = e.target.value.replace(/[^0-9]/g, '');
+                        this.jumlahRaw = angka;
+                        this.jumlahFormatted = angka ? new Intl.NumberFormat('id-ID').format(angka) : '';
+                    }
+                 }">
                 <div class="card-h"><span class="card-t">Pembayaran</span>
                     <button type="button" class="pill-link" @click="open = !open">+ Catat</button>
                 </div>
@@ -6337,13 +6354,22 @@ window.tafToast = function (type, message) {
                         @csrf
                         
                         {{-- DIJADIKAN 3 KOLOM AGAR SEIMBANG --}}
-                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:0 14px;">
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:0 14px;">
                             <div class="field"><label>Jenis</label>
-                                <select class="input" name="jenis" required>
-                                    <option value="dp">DP</option><option value="pelunasan">Pelunasan</option><option value="cicilan">Cicilan</option>
+                                <select class="input" name="jenis" x-model="jenis" @change="autoFillJumlah()" required>
+                                    <option value="" disabled selected>Pilih Jenis...</option>
+                                    <option value="dp">DP</option>
+                                    <option value="pelunasan">Pelunasan</option>
+                                    <option value="cicilan">Cicilan</option>
                                 </select>
                             </div>
-                            <div class="field"><label>Jumlah (Rp)</label><input class="input" type="number" name="jumlah" min="1" value="{{ (int) $pemesanan->sisa }}" required></div>
+                            <div class="field"><label>Jumlah (Rp)</label>
+                                {{-- HIDDEN INPUT: nilai mentah tanpa titik, ini yang dikirim ke server --}}
+                                <input type="hidden" name="jumlah" :value="jumlahRaw">
+                                {{-- VISIBLE INPUT: yang dilihat admin, otomatis bertitik seperti di halaman klien --}}
+                                <input class="input" type="text" inputmode="numeric" :value="jumlahFormatted"
+                                    @input="formatRupiah" placeholder="Maks: {{ $pemesanan->sisa_format }}" required>
+                            </div>
                             <div class="field"><label>Metode</label><input class="input" name="metode" placeholder="Transfer BCA"></div>
                         </div>
 
@@ -6950,7 +6976,7 @@ window.tafToast = function (type, message) {
                 <div class="alert alert-error" style="margin-bottom:20px;"><span>{{ $errors->first() }}</span></div>
             @endif
 
-            <form method="POST" action="{{ route('client.pemesanan.store') }}" @submit="syncBeforeSubmit($event)">
+            <form method="POST" action="{{ route('client.pemesanan.store') }}" id="pemesananForm" @submit="syncBeforeSubmit($event)">
                 @csrf
 
                 <div class="wiz-layout">
@@ -7180,7 +7206,8 @@ window.tafToast = function (type, message) {
             </div>
             <div class="wiz-mbar-btns">
                 <button type="button" class="btn btn-outline" @click="prev" x-show="step > 1">Kembali</button>
-                <button type="button" class="btn btn-gold" @click="next">Lanjutkan</button>
+                <button type="button" class="btn btn-gold" @click="next" x-show="step < 3">Lanjutkan</button>
+                <button type="submit" class="btn btn-gold" form="pemesananForm" x-show="step === 3">Kirim Pesanan</button>
             </div>
         </div>
 
@@ -9522,8 +9549,18 @@ table tbody tr:hover{background:var(--bg2)}
 .step-line{width:32px;height:1.5px;background:var(--border2);margin:0 6px;flex:none}
 .step-line.done{background:var(--gold)}
 
+/* Mobile: sembunyikan label teks, cukup nomor + garis, supaya 3 tahap selalu muat tanpa kepotong/discroll */
+@media (max-width:480px){
+  .stepper3{overflow-x:visible}
+  .step-label{display:none}
+  .step-line{flex:1;width:auto;margin:0 6px}
+}
+
 /* ============ KARTU LAYANAN BERGAMBAR (dipakai bersama: landing "Layanan Kami" & wizard "Pilih Layanan") ============ */
 .svc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media (max-width:480px){
+  .svc-grid{grid-template-columns:1fr}
+}
 @media (min-width:768px){
   .svc-grid{grid-template-columns:repeat(3,1fr)}
 }
