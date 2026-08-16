@@ -99,8 +99,10 @@
             'status_label' => $b->status_label,
             'bayar' => $b->status_bayar,
             'bayar_label' => $b->status_bayar_label,
+            'jenis_label' => $b->jenis_acara_label,
+            'jenis_cls' => $b->jenis_acara === 'wedding' ? 'b-gold' : 'b-blue',
             'url' => route('admin.pemesanan.show', $b),
-            'cari' => mb_strtolower($b->nama_klien . ' ' . $b->kode),
+            'cari' => mb_strtolower($b->nama_klien . ' ' . $b->kode . ' ' . $b->jenis_acara_label),
         ])->values();
     @endphp
     <div class="fade" x-data="orderList({{ Illuminate\Support\Js::from($rows) }})">
@@ -197,7 +199,11 @@
                     </div>
                     <div style="font-family:var(--serif);font-size:21px;font-weight:600;color:var(--ink);line-height:1.2;margin-bottom:3px;"
                         x-text="o.nama"></div>
-                    <div style="font-size:13px;color:var(--ink3);" x-text="o.tanggal"></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                        <span style="font-size:13px;color:var(--ink3);" x-text="o.tanggal"></span>
+                        <span class="badge" :class="o.jenis_cls" style="font-size:10.5px;padding:4px 9px;"
+                            x-text="o.jenis_label"></span>
+                    </div>
 
                     <div
                         style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);">

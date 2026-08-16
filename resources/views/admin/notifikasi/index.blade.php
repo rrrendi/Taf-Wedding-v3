@@ -15,7 +15,7 @@
             </div>
         </div>
 
-        {{-- PENGATURAN --}}
+        {{-- PENGATURAN (satu card, agar tombol Simpan jelas berlaku untuk semua pengaturan di atasnya) --}}
         <form method="POST" action="{{ route('admin.notifikasi.update') }}" x-data="{
                 aktif: {{ $cfg['aktif'] ? 'true' : 'false' }},
                 bayar: {{ $cfg['bayar_aktif'] ? 'true' : 'false' }},
@@ -29,8 +29,9 @@
             @csrf
 
             <div class="card">
-                <div class="card-h"><span class="card-t">Koneksi WhatsApp Gateway (Fonnte)</span></div>
+                <div class="card-h"><span class="card-t">Pengaturan Notifikasi WhatsApp</span></div>
                 <div class="card-b">
+
                     <label
                         style="display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;padding:6px 0;">
                         <span>
@@ -43,9 +44,7 @@
                             style="width:20px;height:20px;flex:none;accent-color:var(--gold);">
                     </label>
 
-                    <div class="divider-sm"></div>
-
-                    <div class="field">
+                    <div class="field" style="margin-top:10px;">
                         <label>Nomor WhatsApp Admin/Owner</label>
                         <input type="text" name="fonnte_admin_number" class="input"
                             value="{{ old('fonnte_admin_number', $cfg['gw_admin_number']) }}"
@@ -62,33 +61,29 @@
                             @if ($cfg['gw_token_set'])
                                 <span style="color:var(--green);font-weight:700;">✓ Token tersimpan.</span>
                             @else
-                                <span style="color:var(--red);font-weight:700;">⚠ Token belum diatur — notifikasi berjalan mode
+                                <span style="color:var(--red);font-weight:700;">⚠ Token belum diatur — notifikasi berjalan
+                                    mode
                                     simulasi.</span>
                             @endif
                         </p>
                     </div>
-                </div>
-            </div>
 
-            <div class="card">
-                <div class="card-h"><span class="card-t">Pengaturan Reminder Otomatis</span></div>
-                <div class="card-b">
+                    <div class="divider"></div>
 
                     {{-- master toggle --}}
                     <label
                         style="display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;padding:6px 0;">
                         <span>
                             <span style="font-weight:700;color:var(--ink);">Aktifkan reminder otomatis</span>
-                            <span style="display:block;font-size:12.5px;color:var(--muted);margin-top:2px;">Sistem mengirim
+                            <span style="display:block;font-size:12.5px;color:var(--muted);margin-top:2px;">Sistem
+                                mengirim
                                 pengingat sendiri sesuai jadwal di bawah.</span>
                         </span>
                         <input type="checkbox" name="reminder_aktif" value="1" x-model="aktif"
                             style="width:20px;height:20px;flex:none;accent-color:var(--gold);">
                     </label>
 
-                    <div x-show="aktif" x-cloak>
-                        <div class="divider-sm"></div>
-
+                    <div x-show="aktif" x-cloak style="margin-top:10px;">
                         {{-- H-minus chips --}}
                         <div class="field">
                             <label>Kirim pengingat acara pada</label>
@@ -133,7 +128,8 @@
                         style="display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;padding:6px 0;">
                         <span>
                             <span style="font-weight:700;color:var(--ink);">Reminder pembayaran</span>
-                            <span style="display:block;font-size:12.5px;color:var(--muted);margin-top:2px;">Ingatkan klien
+                            <span style="display:block;font-size:12.5px;color:var(--muted);margin-top:2px;">Ingatkan
+                                klien
                                 yang masih punya sisa tagihan menjelang acara.</span>
                         </span>
                         <input type="checkbox" name="reminder_bayar_aktif" value="1" x-model="bayar"
@@ -141,15 +137,18 @@
                     </label>
                     <div class="field" x-show="bayar" x-cloak style="margin-top:10px;">
                         <label>Untuk acara dalam (hari) ke depan</label>
-                        <input type="number" name="reminder_bayar_dalam" min="1" max="90" value="{{ $cfg['bayar_dalam'] }}"
-                            class="input" style="max-width:160px;">
+                        <input type="number" name="reminder_bayar_dalam" min="1" max="90"
+                            value="{{ $cfg['bayar_dalam'] }}" class="input" style="max-width:160px;">
                     </div>
 
-                    <button type="submit" class="btn btn-gold btn-full" style="margin-top:16px;">Simpan Pengaturan</button>
+                    <div class="divider"></div>
+
+                    <button type="submit" class="btn btn-gold btn-full">Simpan Pengaturan</button>
                     <p class="muted" style="font-size:12px;margin-top:12px;line-height:1.6;">
                         <strong>Catatan:</strong> Agar pengingat terkirim otomatis, server harus menjalankan penjadwal
                         Laravel
-                        (<code>php artisan schedule:work</code> saat demo, atau cron <code>schedule:run</code> di server).
+                        (<code>php artisan schedule:work</code> saat demo, atau cron <code>schedule:run</code> di
+                        server).
                         Anda juga selalu
                         bisa mengirim manual dari halaman detail tiap pesanan.
                     </p>
@@ -165,7 +164,8 @@
                 <p class="muted" style="font-size:12.5px;margin-bottom:4px;">
                     <span class="badge b-green" style="font-size:10px;">Terkirim</span> berhasil dikirim ·
                     <span class="badge b-red" style="font-size:10px;">Gagal</span> gagal dikirim ·
-                    <span class="badge b-orange" style="font-size:10px;">Mode Demo</span> dicatat tapi belum dikirim (mode
+                    <span class="badge b-orange" style="font-size:10px;">Mode Demo</span> dicatat tapi belum dikirim
+                    (mode
                     demo).
                 </p>
             </div>
@@ -189,14 +189,16 @@
                                     <span class="badge {{ $bc }} rt-status-preview">{{ $bt }}</span>
                                 </td>
                                 <td data-label="Jenis">{{ ucwords(str_replace('_', ' ', $log->jenis)) }}</td>
-                                <td data-label="Tujuan" style="font-size:12.5px;color:var(--muted);">{{ $log->tujuan }}</td>
+                                <td data-label="Tujuan" style="font-size:12.5px;color:var(--muted);">{{ $log->tujuan }}
+                                </td>
                                 <td data-label="Waktu" style="font-size:12.5px;">
                                     {{ $log->created_at->translatedFormat('d M Y, H:i') }}</td>
                                 <td data-label="Status"><span class="badge {{ $bc }}">{{ $bt }}</span></td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="muted" style="text-align:center;padding:26px;">Belum ada pesan terkirim.
+                                <td colspan="5" class="muted" style="text-align:center;padding:26px;">Belum ada pesan
+                                    terkirim.
                                 </td>
                             </tr>
                         @endforelse

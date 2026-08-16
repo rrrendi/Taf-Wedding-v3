@@ -151,7 +151,7 @@
             ['st' => $stepDp, 't' => 'Pembayaran DP', 's' => $pemesanan->terbayar > 0 ? ('Pembayaran ' . $pemesanan->terbayar_format . ' tercatat') : 'Menunggu pembayaran DP'],
             ['st' => $stepPelunasan, 't' => 'Pelunasan', 's' => $sb === 'lunas' ? 'Pembayaran lunas' : ('Sisa ' . $pemesanan->sisa_format)],
             ['st' => $stepPersiapan, 't' => 'Persiapan Hari-H', 's' => 'Koordinasi seluruh layanan dan vendor'],
-            ['st' => $stepHariH, 't' => 'Hari Pernikahan', 's' => $pemesanan->tanggal_acara->translatedFormat('l, d F Y')],
+            ['st' => $stepHariH, 't' => $pemesanan->jenis_acara === 'wedding' ? 'Hari Pernikahan' : 'Hari Acara', 's' => $pemesanan->tanggal_acara->translatedFormat('l, d F Y')],
         ];
 
         $tlIcon = function ($st) {
@@ -196,6 +196,7 @@
                 <div class="order-card" style="margin-bottom: 0;">
                     <div class="o-id">{{ $pemesanan->kode }}</div>
                     <div class="o-name">{{ $pemesanan->nama_klien }}</div>
+                    <div style="font-size:11px;color:#A99B82;letter-spacing:.4px;margin-top:2px;">{{ $pemesanan->jenis_acara_label }}</div>
                     <div class="o-date">{{ $pemesanan->tanggal_acara->translatedFormat('l, d F Y') }} ·
                         {{ $pemesanan->lokasi }}</div>
 
@@ -360,6 +361,8 @@
                                 jumlahFormatted: '',
                                 sisa: {{ $pemesanan->sisa }},
                                 total: {{ $pemesanan->total }},
+                                buktiPreview: null,
+                                buktiIsImage: false,
 
                                 autoFillJumlah() {
                                     let nominal = 0;
@@ -393,6 +396,23 @@
                                     let angka = e.target.value.replace(/[^0-9]/g, '');
                                     this.jumlahRaw = angka;
                                     this.jumlahFormatted = angka ? new Intl.NumberFormat('id-ID').format(angka) : '';
+                                },
+                                onBuktiChange() {
+                                    const file = this.$refs.bukti.files[0];
+                                    if (this.buktiPreview) URL.revokeObjectURL(this.buktiPreview);
+                                    if (!file) { this.name = ''; this.buktiPreview = null; this.buktiIsImage = false; return; }
+                                    this.name = file.name;
+                                    this.buktiIsImage = file.type.startsWith('image/');
+                                    this.buktiPreview = this.buktiIsImage ? URL.createObjectURL(file) : null;
+                                },
+                                jenisLabel() {
+                                    return { dp: 'DP (Down Payment)', pelunasan: 'Pelunasan', cicilan: 'Cicilan' }[this.jenis] || 'Pembayaran';
+                                },
+                                confirmSubmit(e) {
+                                    const nominal = this.jumlahFormatted || '0';
+                                    const buktiInfo = this.name ? ('dengan bukti \'' + this.name + '\'') : 'TANPA lampiran bukti';
+                                    const ok = confirm('Konfirmasi kirim ' + this.jenisLabel() + ' sebesar Rp ' + nominal + ', ' + buktiInfo + '.\n\nPastikan nominal dan bukti sudah benar sebelum dikirim.');
+                                    if (!ok) e.preventDefault();
                                 }
                              }"
                         style="background: radial-gradient(70% 90% at 100% 0%, rgba(201, 162, 75, 0.12), transparent 65%), linear-gradient(155deg, #1C1710, #110E08); border: 1.5px solid var(--border2); color: #F4E8CC; margin-bottom: 0;">
@@ -414,7 +434,7 @@
                             </div>
 
                             <form method="POST" action="{{ route('client.pembayaran.store', $pemesanan) }}"
-                                enctype="multipart/form-data">
+                                enctype="multipart/form-data" @submit="confirmSubmit($event)">
                                 @csrf
 
                                 <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -498,19 +518,45 @@
                                         <label style="color: var(--gold3); font-weight: 700; font-size: 11px;">File Bukti (JPG,
                                             PNG, PDF — maks 5MB)</label>
                                         <label class="upload"
-                                            style="display:block; background: rgba(255, 255, 255, 0.04); border: 1.5px dashed rgba(231, 200, 121, 0.4); border-radius: var(--r3); padding: 16px 12px; text-align: center; cursor: pointer;"
+                                            style="display:block; text-align:center; padding:0; overflow:hidden; cursor:pointer; background: rgba(255, 255, 255, 0.04); border: 1.5px dashed rgba(231, 200, 121, 0.4); border-radius: var(--r3);"
                                             @click.prevent="$refs.bukti.click()">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="rgba(231, 200, 121, 0.8)"
-                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                style="width: 24px; height: 24px; margin: 0 auto 6px;">
-                                                <path d="M12 16V4M7 9l5-5 5 5" />
-                                                <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
-                                            </svg>
-                                            <div style="font-size:12px; font-weight:600; color:#FCF7EB;"
-                                                x-text="name ? name : 'Pilih file bukti (ketuk)'"></div>
+
+                                            {{-- TAMPILAN AWAL (belum ada file) --}}
+                                            <div x-show="!name" style="padding: 32px 16px;">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="rgba(231, 200, 121, 0.8)"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                    style="width: 24px; height: 24px; margin: 0 auto 6px;">
+                                                    <path d="M12 16V4M7 9l5-5 5 5" />
+                                                    <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+                                                </svg>
+                                                <div style="font-size:12px; font-weight:600; color:#FCF7EB;">Pilih file bukti
+                                                    (ketuk)</div>
+                                            </div>
+
+                                            {{-- TAMPILAN PREVIEW GAMBAR (sudah ada foto) --}}
+                                            <div x-show="buktiPreview" x-cloak
+                                                style="position:relative; width:100%; aspect-ratio:4/3; background:rgba(0,0,0,0.25);">
+                                                <img :src="buktiPreview" style="width:100%; height:100%; object-fit:cover; display:block;"
+                                                    alt="Preview bukti pembayaran">
+                                                <div style="position:absolute; bottom:12px; right:12px;">
+                                                    <span class="badge b-gold" style="box-shadow:0 4px 10px rgba(0,0,0,0.3);">Ketuk
+                                                        untuk Ganti</span>
+                                                </div>
+                                            </div>
+
+                                            {{-- TAMPILAN FILE PDF (tidak ada pratinjau gambar) --}}
+                                            <div x-show="name && !buktiIsImage" x-cloak style="padding: 28px 16px;">
+                                                <div style="font-size:30px; line-height:1; margin-bottom:8px;">📄</div>
+                                                <div style="font-size:12px; font-weight:600; color:#FCF7EB; word-break:break-all;"
+                                                    x-text="name"></div>
+                                                <div style="margin-top:10px;">
+                                                    <span class="badge b-gold">Ketuk untuk Ganti</span>
+                                                </div>
+                                            </div>
+
                                         </label>
                                         <input type="file" name="bukti" accept=".jpg,.jpeg,.png,.pdf" x-ref="bukti"
-                                            @change="name = $refs.bukti.files[0].name" style="display:none;" required>
+                                            @change="onBuktiChange()" style="display:none;" required>
                                     </div>
                                 </div>
 

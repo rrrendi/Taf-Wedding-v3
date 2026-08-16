@@ -9,7 +9,7 @@ class LayananSeeder extends Seeder
 {
     public function run(): void
     {
-        // 9 layanan Taf Wedding (sesuai proposal & UI). Harga = ilustrasi acuan.
+        // 9 layanan Taf Wedding (sesuai proposal & UI) + 1 layanan tambahan untuk acara Non-Wedding.
         $data = [
             ['nama' => 'Makeup Pengantin', 'icon' => '💄', 'kategori' => 'makeup_only',   'harga' => 3500000,  'deskripsi' => 'Riasan profesional untuk tampilan sempurna di hari istimewa.'],
             ['nama' => 'Dekorasi',         'icon' => '🌸', 'kategori' => 'paket_wedding', 'harga' => 15000000, 'deskripsi' => 'Konsep dekorasi elegan sesuai tema pernikahan Anda.'],
@@ -20,6 +20,7 @@ class LayananSeeder extends Seeder
             ['nama' => 'Sound System',     'icon' => '🎙️', 'kategori' => 'tambahan',      'harga' => 3000000,  'deskripsi' => 'Sistem audio profesional untuk seluruh area venue.'],
             ['nama' => 'Siraman',          'icon' => '💧', 'kategori' => 'tambahan',      'harga' => 2500000,  'deskripsi' => 'Prosesi siraman yang sakral dengan sentuhan modern.'],
             ['nama' => 'Hias Hantaran',    'icon' => '🎁', 'kategori' => 'tambahan',      'harga' => 1500000,  'deskripsi' => 'Hantaran cantik yang dirancang penuh keindahan.'],
+            ['nama' => 'Makeup Non-Wedding', 'icon' => '💋', 'kategori' => 'makeup_only', 'harga' => 2000000,  'deskripsi' => 'Riasan profesional untuk acara non-wedding: ulang tahun, wisuda, photoshoot, dan acara lainnya.'],
         ];
 
         foreach ($data as $row) {

@@ -62,8 +62,10 @@ class PemesananController extends Controller
         }
 
         $validated = $request->validate([
+            'jenis_acara' => ['required', 'in:wedding,lainnya'],
             'nama_pria' => ['required', 'string', 'max:100'],
-            'nama_wanita' => ['required', 'string', 'max:100'],
+            'nama_wanita' => ['required_if:jenis_acara,wedding', 'nullable', 'string', 'max:100'],
+            'nama_acara' => ['required_if:jenis_acara,lainnya', 'nullable', 'string', 'max:150'],
             'phone' => ['required', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:150'],
             'tanggal_acara' => ['required', 'date', 'after_or_equal:today'],
@@ -73,16 +75,34 @@ class PemesananController extends Controller
             'layanan' => ['required', 'array', 'min:1'],
             'layanan.*' => ['integer', 'exists:layanans,id'],
         ], [
+            'jenis_acara.required' => 'Pilih jenis acara terlebih dahulu (Wedding / Non-Wedding).',
             'layanan.required' => 'Pilih minimal satu layanan.',
             'tanggal_acara.after_or_equal' => 'Tanggal acara tidak boleh di masa lalu.',
+            'nama_wanita.required_if' => 'Nama mempelai wanita wajib diisi untuk acara Wedding.',
+            'nama_acara.required_if' => 'Jenis/nama acara wajib diisi untuk acara Non-Wedding.',
         ]);
+
+        // Paket Wedding hanya untuk acara Wedding — jaga-jaga bila filter di JS "ditembus" lewat request manual.
+        if ($validated['jenis_acara'] === 'lainnya') {
+            $adaPaketWedding = Layanan::whereIn('id', $validated['layanan'])
+                ->where('kategori', 'paket_wedding')
+                ->exists();
+
+            if ($adaPaketWedding) {
+                return back()
+                    ->withErrors(['layanan' => 'Paket Wedding hanya tersedia untuk acara Wedding. Untuk acara Non-Wedding, silakan pilih layanan Makeup Only / Tambahan.'])
+                    ->withInput();
+            }
+        }
 
         $pemesanan = DB::transaction(function () use ($validated) {
             $pemesanan = Pemesanan::create([
                 'kode' => Pemesanan::generateKode(),
                 'user_id' => Auth::id(),
+                'jenis_acara' => $validated['jenis_acara'],
                 'nama_pria' => $validated['nama_pria'],
-                'nama_wanita' => $validated['nama_wanita'],
+                'nama_wanita' => $validated['jenis_acara'] === 'wedding' ? $validated['nama_wanita'] : null,
+                'nama_acara' => $validated['jenis_acara'] === 'lainnya' ? $validated['nama_acara'] : null,
                 'phone' => $validated['phone'],
                 'email' => $validated['email'] ?? Auth::user()->email,
                 'tanggal_acara' => $validated['tanggal_acara'],

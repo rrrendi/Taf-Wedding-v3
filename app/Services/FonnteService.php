@@ -111,9 +111,12 @@ class FonnteService
 
     public function pesanKonfirmasiPemesanan(Pemesanan $p): string
     {
-        return "Halo Kak {$p->nama_klien} 👰🤵\n\n"
+        $emoji = $p->jenis_acara === 'wedding' ? '👰🤵' : '✨';
+
+        return "Halo Kak {$p->nama_klien} {$emoji}\n\n"
             . "Terima kasih telah memesan layanan *Taf Wedding*.\n"
             . "Pesanan (Kode: *{$p->kode}*) telah masuk ke sistem dan sedang menunggu konfirmasi admin kami.\n\n"
+            . "🗓️ Jenis Acara: {$p->jenis_acara_label}\n"
             . "📅 Tanggal Acara: " . $p->tanggal_acara->translatedFormat('l, d F Y') . "\n"
             . "📍 Lokasi: {$p->lokasi}\n"
             . "💰 Estimasi: Rp " . number_format((float) $p->total, 0, ',', '.') . "\n\n"
@@ -145,10 +148,13 @@ class FonnteService
 
     public function pesanReminderHari(Pemesanan $p, int $h): string
     {
+        $labelAcara = $p->jenis_acara === 'wedding' ? 'acara pernikahan Anda' : "acara *{$p->jenis_acara_label}* Anda";
+        $penutup = $p->jenis_acara === 'wedding' ? 'Sampai jumpa di hari bahagia Anda 💍' : 'Sampai jumpa di hari acara Anda 🎉';
+
         return "Halo Kak {$p->nama_klien} ⏰\n\n"
-            . "Semoga sehat selalu! Kami ingin mengingatkan bahwa acara pernikahan Anda tinggal *H-{$h}*!\n\n"
+            . "Semoga sehat selalu! Kami ingin mengingatkan bahwa {$labelAcara} tinggal *H-{$h}*!\n\n"
             . "📅 " . $p->tanggal_acara->translatedFormat('l, d F Y') . "\n"
             . "📍 {$p->lokasi}\n\n"
-            . "Tim Taf Wedding sudah bersiap. Mohon balas *\"OK\"* agar kami tahu Kakak sudah membaca pengingat ini. Sampai jumpa di hari bahagia Anda 💍";
+            . "Tim Taf Wedding sudah bersiap. Mohon balas *\"OK\"* agar kami tahu Kakak sudah membaca pengingat ini. {$penutup}";
     }
 }

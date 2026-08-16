@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Pemesanan extends Model
 {
     protected $fillable = [
-        'kode', 'user_id', 'nama_pria', 'nama_wanita', 'phone', 'email',
+        'kode', 'user_id', 'jenis_acara', 'nama_pria', 'nama_wanita', 'nama_acara', 'phone', 'email',
         'tanggal_acara', 'jumlah_tamu', 'lokasi', 'catatan', 'status', 'total',
     ];
 
@@ -50,10 +50,33 @@ class Pemesanan extends Model
 
     /* ============ AKSESOR KEUANGAN (logika terpusat, anti-mislogic) ============ */
 
-    /** Nama pasangan untuk ditampilkan, mis. "Rina & Andi". */
+    /**
+     * Nama klien untuk ditampilkan (dipakai di seluruh admin/invoice/notifikasi WA
+     * lewat satu titik ini saja, agar tidak perlu ubah banyak file lain).
+     * - Wedding            : nama pasangan, mis. "Rina & Andi".
+     * - Non-Wedding/lainnya: nama pemesan saja (tersimpan di kolom nama_pria).
+     */
     public function getNamaKlienAttribute(): string
     {
+        if ($this->jenis_acara === 'lainnya') {
+            return $this->nama_pria;
+        }
         return trim($this->nama_wanita . ' & ' . $this->nama_pria, ' &');
+    }
+
+    /** Label untuk kolom nama klien di form/tabel: "Mempelai" atau "Nama Pemesan". */
+    public function getLabelNamaKlienAttribute(): string
+    {
+        return $this->jenis_acara === 'lainnya' ? 'Nama Pemesan' : 'Mempelai';
+    }
+
+    /** Label jenis acara: "Wedding" atau nama acara spesifik (mis. "Wisuda"). */
+    public function getJenisAcaraLabelAttribute(): string
+    {
+        if ($this->jenis_acara === 'wedding') {
+            return 'Wedding';
+        }
+        return $this->nama_acara ?: 'Acara Lainnya';
     }
 
     /** Total yang sudah dibayar = jumlah pembayaran berstatus TERVERIFIKASI saja. */

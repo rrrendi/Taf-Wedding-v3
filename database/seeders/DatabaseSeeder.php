@@ -81,18 +81,31 @@ class DatabaseSeeder extends Seeder
                 'layanan' => $L(['Makeup Pengantin', 'Dekorasi', 'Foto & Video', 'Catering', 'Sound System']),
                 'tamu' => '300 – 500 orang',
             ],
+            // Contoh acara Non-Wedding: klien cukup memesan makeup tanpa mengisi data mempelai.
+            [
+                'jenis' => 'lainnya', 'acara' => 'Wisuda S1',
+                'pria' => 'Sinta Wulandari', 'wanita' => null, 'tanggal' => '2026-08-25',
+                'venue' => 'Graha Sanusi Unpad, Bandung', 'phone' => '081345678900',
+                'status' => 'pending', 'bayar' => 'belum', 'user_id' => $klien->id,
+                'layanan' => $L(['Makeup Non-Wedding']),
+                'tamu' => null,
+            ],
         ];
 
         foreach ($samples as $s) {
+            $jenisAcara = $s['jenis'] ?? 'wedding';
+
             $p = Pemesanan::create([
                 'kode'          => Pemesanan::generateKode(),
                 'user_id'       => $s['user_id'],
+                'jenis_acara'   => $jenisAcara,
                 'nama_pria'     => $s['pria'],
-                'nama_wanita'   => $s['wanita'],
+                'nama_wanita'   => $s['wanita'] ?? null,
+                'nama_acara'    => $s['acara'] ?? null,
                 'phone'         => $s['phone'],
                 'email'         => null,
                 'tanggal_acara' => $s['tanggal'],
-                'jumlah_tamu'   => $s['tamu'],
+                'jumlah_tamu'   => $s['tamu'] ?? null,
                 'lokasi'        => $s['venue'],
                 'status'        => $s['status'],
                 'total'         => 0,

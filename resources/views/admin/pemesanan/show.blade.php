@@ -19,7 +19,10 @@
     <div class="pg-head">
         <div>
             <h1>{{ $pemesanan->nama_klien }}</h1>
-            <p>{{ $pemesanan->kode }} · dibuat {{ $pemesanan->created_at->translatedFormat('d F Y') }}</p>
+            <p>{{ $pemesanan->kode }} · dibuat {{ $pemesanan->created_at->translatedFormat('d F Y') }}
+                <span class="badge {{ $pemesanan->jenis_acara === 'wedding' ? 'b-gold' : 'b-blue' }}"
+                    style="margin-left:6px;">{{ $pemesanan->jenis_acara_label }}</span>
+            </p>
         </div>
         <a href="{{ route('admin.pemesanan.index') }}" class="btn btn-ghost btn-sm">&larr; Kembali</a>
     </div>
@@ -104,7 +107,8 @@
             <div class="card">
                 <div class="card-h"><span class="card-t">Informasi Acara</span></div>
                 <div class="card-b">
-                    <div class="summary-line"><span class="muted">Mempelai</span><span><strong>{{ $pemesanan->nama_klien }}</strong></span></div>
+                    <div class="summary-line"><span class="muted">{{ $pemesanan->label_nama_klien }}</span><span><strong>{{ $pemesanan->nama_klien }}</strong></span></div>
+                    <div class="summary-line"><span class="muted">Jenis Acara</span><span><strong>{{ $pemesanan->jenis_acara_label }}</strong></span></div>
                     <div class="summary-line"><span class="muted">Tanggal</span><span>{{ $pemesanan->tanggal_acara->translatedFormat('l, d M Y') }}</span></div>
                     <div class="summary-line"><span class="muted">Lokasi</span><span style="text-align:right;max-width:62%;">{{ $pemesanan->lokasi }}</span></div>
                     <div class="summary-line"><span class="muted">Jumlah Tamu</span><span>{{ $pemesanan->jumlah_tamu ?: '—' }}</span></div>

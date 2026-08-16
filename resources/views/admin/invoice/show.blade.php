@@ -103,7 +103,9 @@
             <div class="val-line">{{ $pemesanan->email }}</div>
         </td>
         <td style="width:52%;">
-            <div class="lbl">ACARA TANGGAL :</div>
+            <div class="lbl">JENIS ACARA :</div>
+            <div class="val-line" style="margin-top:6px;">{{ $pemesanan->jenis_acara_label }}</div>
+            <div class="lbl" style="margin-top:8px;">ACARA TANGGAL :</div>
             <div class="val-line" style="margin-top:6px;">{{ $pemesanan->tanggal_acara->translatedFormat('l, d F Y') }}</div>
             <div class="lbl" style="margin-top:8px;">LOKASI ACARA :</div>
             <div class="val-line" style="margin-top:6px;">{{ $pemesanan->lokasi }}</div>
