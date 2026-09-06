@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pemesanan;
+use App\Models\Pengaturan; // Ditambahkan untuk mengambil nilai DP dari database
 use App\Services\FonnteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +25,18 @@ class PembayaranController extends Controller
             'metode' => ['nullable', 'string', 'max:50'],
             'bukti'  => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ]);
+
+        // FITUR TAMBAHAN: Validasi nominal DP minimal (Dinamis dari Pengaturan)
+        if ($validated['jenis'] === 'dp') {
+            $minDpPersen = Pengaturan::get('minimal_dp_persen', 50); // Default 50%
+            $minDpNominal = ($pemesanan->total * $minDpPersen) / 100;
+            
+            if ($validated['jumlah'] < $minDpNominal) {
+                return back()->withErrors([
+                    'jumlah' => "Uang muka (DP) minimal adalah {$minDpPersen}% dari total nilai kontrak (Minimal: Rp " . number_format($minDpNominal, 0, ',', '.') . ")."
+                ])->withInput();
+            }
+        }
 
         $path = $request->file('bukti')->store('bukti-bayar', 'public');
 

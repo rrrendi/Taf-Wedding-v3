@@ -55,10 +55,12 @@
 
                     <div class="field">
                         <label>Token Fonnte</label>
-                        <input type="password" name="fonnte_token" class="input"
-                            placeholder="{{ $cfg['gw_token_set'] ? '•••••••• (tersimpan — kosongkan bila tidak ingin mengganti)' : 'Belum diatur — isi token dari dashboard Fonnte' }}">
+                        {{-- MENGHILANGKAN SENSOR PASSWORD DAN MENAMPILKAN TOKEN ASLI --}}
+                        <input type="text" name="fonnte_token" class="input"
+                            value="{{ \App\Models\Pengaturan::get('fonnte_token') }}"
+                            placeholder="Belum diatur — isi token dari dashboard Fonnte">
                         <p class="muted" style="font-size:12px;margin-top:6px;">
-                            @if ($cfg['gw_token_set'])
+                            @if (\App\Models\Pengaturan::get('fonnte_token'))
                                 <span style="color:var(--green);font-weight:700;">✓ Token tersimpan.</span>
                             @else
                                 <span style="color:var(--red);font-weight:700;">⚠ Token belum diatur — notifikasi berjalan
@@ -66,6 +68,17 @@
                                     simulasi.</span>
                             @endif
                         </p>
+                    </div>
+
+                    <div class="divider-sm"></div>
+
+                    {{-- FITUR TAMBAHAN: Pengaturan DP Minimal --}}
+                    <div class="field">
+                        <label>Minimal Uang Muka / DP (%)</label>
+                        <input type="number" name="minimal_dp_persen" class="input" min="1" max="100"
+                            value="{{ \App\Models\Pengaturan::get('minimal_dp_persen', 50) }}"
+                            placeholder="mis. 50">
+                        <p class="muted" style="font-size:12px;margin-top:6px;">Persentase minimal untuk pembayaran DP awal (default: 50%).</p>
                     </div>
 
                     <div class="divider"></div>

@@ -145,6 +145,11 @@
         $stepPersiapan = $st === 'selesai' ? 'ok' : (($sb === 'lunas' && $st === 'dikonfirmasi') ? 'now' : 'wait');
         $stepHariH = ($st === 'selesai' || $isPast) ? 'ok' : 'wait';
 
+        // AMBIL PENGATURAN DP DINAMIS DARI DATABASE
+        $minDpPersen = \App\Models\Pengaturan::get('minimal_dp_persen', 50); // Default 50 jika belum di-set
+        $minDpMultiplier = $minDpPersen / 100;
+        $minDpNominal = $pemesanan->total * $minDpMultiplier;
+
         $timeline = [
             ['st' => 'ok', 't' => 'Pemesanan Diterima', 's' => 'Data pemesanan tercatat di sistem'],
             ['st' => $stepKonfirmasi, 't' => 'Pemesanan Dikonfirmasi', 's' => $stepKonfirmasi === 'ok' ? 'Admin telah memverifikasi data Anda' : 'Menunggu verifikasi admin'],
@@ -370,8 +375,8 @@
                                         // Pelunasan selalu pas sesuai sisa tagihan
                                         nominal = this.sisa;
                                     } else if (this.jenis === 'dp') {
-                                        // DP otomatis 10% dari total (boleh diedit manual jika ingin bayar lebih)
-                                        nominal = Math.ceil(this.total * 0.10);
+                                        // DP otomatis sekian % dari total berdasarkan database
+                                        nominal = Math.ceil(this.total * {{ $minDpMultiplier }});
                                     } else {
                                         // Cicilan: nominal diketik manual oleh klien
                                         nominal = 0;
@@ -387,7 +392,8 @@
                                     return this.jenis === 'pelunasan' && Number(this.jumlahRaw) !== this.sisa;
                                 },
                                 get errorDp() {
-                                    return this.jenis === 'dp' && Number(this.jumlahRaw) > 0 && Number(this.jumlahRaw) < {{ $pemesanan->total * 0.10 }};
+                                    // DP dinamis berdasarkan setting admin
+                                    return this.jenis === 'dp' && Number(this.jumlahRaw) > 0 && Number(this.jumlahRaw) < {{ $minDpNominal }};
                                 },
                                 get isInvalid() {
                                     return this.isOverpayment || this.errorPelunasan || this.errorDp || Number(this.jumlahRaw) <= 0;
@@ -494,7 +500,7 @@
                                                 ({{ $pemesanan->sisa_format }}).</span>
                                         </div>
 
-                                        {{-- Pesan Peringatan Minimal DP 10% --}}
+                                        {{-- FITUR TAMBAHAN: Pesan Peringatan Minimal DP Dinamis --}}
                                         <div x-show="errorDp && !isOverpayment" x-cloak
                                             style="color: #FF8F8F; font-size: 11.5px; margin-top: 6px; font-weight: 600; display: flex; align-items: flex-start; gap: 6px; line-height: 1.3;">
                                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
@@ -503,8 +509,8 @@
                                                 <line x1="12" y1="8" x2="12" y2="12" />
                                                 <line x1="12" y1="16" x2="12.01" y2="16" />
                                             </svg>
-                                            <span>Minimal pembayaran DP adalah 10% (Rp
-                                                {{ number_format($pemesanan->total * 0.10, 0, ',', '.') }}).</span>
+                                            <span>Minimal pembayaran DP adalah {{ $minDpPersen }}% (Rp
+                                                {{ number_format($minDpNominal, 0, ',', '.') }}).</span>
                                         </div>
                                     </div>
 

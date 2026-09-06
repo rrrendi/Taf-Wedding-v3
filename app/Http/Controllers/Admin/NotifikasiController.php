@@ -40,6 +40,9 @@ class NotifikasiController extends Controller
             'fonnte_enabled' => ['nullable', 'boolean'],
             'fonnte_admin_number' => ['required', 'string', 'max:20'],
             'fonnte_token' => ['nullable', 'string', 'max:255'],
+            
+            // FITUR TAMBAHAN: Validasi input agar DP hanya bisa diisi angka 1 sampai 100
+            'minimal_dp_persen' => ['required', 'integer', 'between:1,100'],
         ]);
 
         $hari = collect(explode(',', (string) ($data['reminder_hari_h'] ?? '')))
@@ -58,6 +61,9 @@ class NotifikasiController extends Controller
         if (filled($data['fonnte_token'] ?? null)) {
             Pengaturan::set('fonnte_token', $data['fonnte_token']);
         }
+
+        // FITUR TAMBAHAN: Simpan angka persentase DP yang baru ke database
+        Pengaturan::set('minimal_dp_persen', (string) $data['minimal_dp_persen']);
 
         return back()->with('success', 'Pengaturan berhasil disimpan.');
     }

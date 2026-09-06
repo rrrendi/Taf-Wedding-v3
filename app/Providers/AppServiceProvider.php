@@ -24,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
 
         // if (app()->environment('local')) {
         //     URL::forceScheme('https');
-        // } //cloudflared tunnel --url http://127.0.0.1:8000 --protocol http2
+        // } 
+        
+        //cloudflared tunnel --url http://127.0.0.1:8000 --protocol http2
     }
 }
