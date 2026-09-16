@@ -15,9 +15,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('notifikasi_logs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('pemesanan_id')->nullable()
-                  ->constrained('pemesanans')->nullOnDelete();
+            $table->increments('id');
+            $table->unsignedInteger('pemesanan_id')->nullable();
+            $table->foreign('pemesanan_id')->references('id')->on('pemesanans')->nullOnDelete();
             $table->enum('jenis', [
                 'konfirmasi_pemesanan',
                 'konfirmasi_admin',
@@ -41,3 +41,6 @@ return new class extends Migration
         Schema::dropIfExists('notifikasi_logs');
     }
 };
+
+
+

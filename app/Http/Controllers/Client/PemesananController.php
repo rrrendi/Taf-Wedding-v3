@@ -69,7 +69,7 @@ class PemesananController extends Controller
             'phone' => ['required', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:150'],
             'tanggal_acara' => ['required', 'date', 'after_or_equal:today'],
-            'jumlah_tamu' => ['nullable', 'string', 'max:50'],
+            'jumlah_tamu' => ['nullable', 'integer', 'min:1', 'max:100000'],
             'lokasi' => ['required', 'string', 'max:255'],
             'catatan' => ['nullable', 'string'],
             'layanan' => ['required', 'array', 'min:1'],
@@ -82,11 +82,11 @@ class PemesananController extends Controller
             'nama_acara.required_if' => 'Jenis/nama acara wajib diisi untuk acara Non-Wedding.',
         ]);
 
+        $layananTerpilih = Layanan::whereIn('id', $validated['layanan'])->get();
+
         // Paket Wedding hanya untuk acara Wedding — jaga-jaga bila filter di JS "ditembus" lewat request manual.
         if ($validated['jenis_acara'] === 'lainnya') {
-            $adaPaketWedding = Layanan::whereIn('id', $validated['layanan'])
-                ->where('kategori', 'paket_wedding')
-                ->exists();
+            $adaPaketWedding = $layananTerpilih->where('kategori', 'paket_wedding')->isNotEmpty();
 
             if ($adaPaketWedding) {
                 return back()
@@ -95,7 +95,16 @@ class PemesananController extends Controller
             }
         }
 
-        $pemesanan = DB::transaction(function () use ($validated) {
+        // Layanan dengan satuan 'per_orang' (mis. Catering) WAJIB tahu jumlah tamu,
+        // karena harganya dihitung: harga per orang x jumlah tamu.
+        $butuhJumlahTamu = $layananTerpilih->contains(fn (Layanan $l) => $l->isPerOrang());
+        if ($butuhJumlahTamu && empty($validated['jumlah_tamu'])) {
+            return back()
+                ->withErrors(['jumlah_tamu' => 'Estimasi Jumlah Tamu wajib diisi karena Anda memilih layanan Catering — harga catering dihitung per orang dikalikan jumlah tamu.'])
+                ->withInput();
+        }
+
+        $pemesanan = DB::transaction(function () use ($validated, $layananTerpilih) {
             $pemesanan = Pemesanan::create([
                 'kode' => Pemesanan::generateKode(),
                 'user_id' => Auth::id(),
@@ -114,13 +123,15 @@ class PemesananController extends Controller
             ]);
 
             // Lampirkan layanan terpilih + snapshot harga (anti perubahan harga).
-            $layanans = Layanan::whereIn('id', $validated['layanan'])->get();
+            // Layanan 'per_orang' (Catering): qty = jumlah tamu, subtotal = harga per orang x jumlah tamu.
+            // Layanan 'paket' lainnya: qty tetap 1, subtotal = harga paket.
             $attach = [];
-            foreach ($layanans as $l) {
+            foreach ($layananTerpilih as $l) {
+                $qty = $l->isPerOrang() ? (int) $validated['jumlah_tamu'] : 1;
                 $attach[$l->id] = [
-                    'qty' => 1,
+                    'qty' => $qty,
                     'harga' => $l->harga,
-                    'subtotal' => $l->harga,
+                    'subtotal' => $l->harga * $qty,
                 ];
             }
             $pemesanan->layanans()->attach($attach);
@@ -227,3 +238,5 @@ class PemesananController extends Controller
             ->with('success', "Pesanan {$kode} telah dihapus.");
     }
 }
+
+

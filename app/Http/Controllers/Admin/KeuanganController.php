@@ -75,3 +75,6 @@ class KeuanganController extends Controller
         return $pdf->download('Laporan-Keuangan-TafWedding-' . $awal->format('Y-m') . '.pdf');
     }
 }
+
+
+

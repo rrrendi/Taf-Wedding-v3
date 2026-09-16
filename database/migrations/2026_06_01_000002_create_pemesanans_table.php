@@ -15,9 +15,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pemesanans', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('kode', 20)->unique();                 // contoh: TW-0001
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->unsignedInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
 
             $table->string('nama_pria');
             $table->string('nama_wanita');
@@ -44,3 +45,6 @@ return new class extends Migration
         Schema::dropIfExists('pemesanans');
     }
 };
+
+
+

@@ -13,9 +13,22 @@
         </select>
     </div>
 </div>
-<div class="field">
-    <label>Harga (Rp)</label>
-    <input class="input" type="number" name="harga" min="0" value="{{ old('harga', $l ? (int) $l->harga : '') }}" placeholder="3500000" required>
+<div class="row">
+    <div class="field">
+        <label>Harga (Rp)</label>
+        <input class="input" type="number" name="harga" min="0" value="{{ old('harga', $l ? (int) $l->harga : '') }}" placeholder="3500000" required>
+    </div>
+    <div class="field">
+        <label>Satuan Harga</label>
+        <select class="input" name="satuan" required>
+            @foreach (['paket' => 'Per Paket (harga tetap)', 'per_orang' => 'Per Orang (dikalikan jumlah tamu)'] as $val => $lbl)
+                <option value="{{ $val }}" @selected(old('satuan', $l->satuan ?? 'paket') === $val)>{{ $lbl }}</option>
+            @endforeach
+        </select>
+        <p class="muted" style="font-size:11.5px;margin-top:6px;">Pilih "Per Orang" khusus layanan yang biayanya
+            mengikuti jumlah tamu (mis. Catering). Harga di atas akan diperlakukan sebagai harga per orang, lalu
+            otomatis dikalikan Estimasi Jumlah Tamu yang diisi klien saat memesan.</p>
+    </div>
 </div>
 
 {{-- BAGIAN BARU: GAMBAR & DESKRIPSI UNTUK POPUP KLIEN --}}
@@ -67,3 +80,5 @@
         Layanan aktif (tampil di landing &amp; form pemesanan klien)
     </label>
 </div>
+
+

@@ -73,6 +73,7 @@
             'id' => $l->id,
             'nama' => $l->nama,
             'harga' => (float) $l->harga,
+            'satuan' => $l->satuan,
             'deskripsi' => $l->deskripsi,
             'gambar_url' => $l->gambar_url,
             'kategori' => $l->kategori,
@@ -237,12 +238,11 @@
                                 </div>
                                 <div class="field">
                                     <label>Estimasi Jumlah Tamu</label>
-                                    <select class="input" name="jumlah_tamu" x-model="jumlah_tamu">
-                                        <option value="" disabled>Pilih perkiraan jumlah tamu</option>
-                                        @foreach (['≤ 100 orang', '100 – 300 orang', '300 – 500 orang', '> 500 orang'] as $opt)
-                                            <option value="{{ $opt }}">{{ $opt }}</option>
-                                        @endforeach
-                                    </select>
+                                    <input class="input" type="number" name="jumlah_tamu" x-model.number="jumlah_tamu"
+                                        min="1" step="1" inputmode="numeric" placeholder="Contoh: 300">
+                                    <p class="muted" style="font-size:11.5px;margin-top:6px;">Dipakai untuk menghitung
+                                        otomatis biaya <strong>Catering</strong> (harga per orang × jumlah tamu). Wajib
+                                        diisi bila Anda memilih layanan Catering.</p>
                                 </div>
                             </div>
                             <div class="field" style="margin-bottom:0;">
@@ -265,6 +265,14 @@
                                 <template x-if="jenisAcara === 'lainnya'"><span> Khusus acara non-wedding, hanya layanan
                                         Makeup Only &amp; Tambahan yang ditampilkan.</span></template>
                             </p>
+
+                            <template x-if="butuhJumlahTamu() && !jumlah_tamu">
+                                <div class="alert alert-error" style="margin-bottom:16px;">
+                                    <span>⚠ Anda memilih layanan Catering — isi dulu <strong>Estimasi Jumlah Tamu</strong>
+                                        di langkah "Data &amp; Acara" (klik <em>Kembali</em>) agar biaya catering
+                                        terhitung otomatis.</span>
+                                </div>
+                            </template>
 
                             <div class="chips" style="margin-bottom:16px;">
                                 <button type="button" class="chip" :class="{ active: filter === 'semua' }"
@@ -311,7 +319,7 @@
                                             <span class="svc-kategori-tag" x-text="kategoriLabel(l.kategori)"></span>
                                             <div class="svc-desc" x-text="l.deskripsi || 'Belum ada deskripsi.'"></div>
                                             <div class="svc-foot">
-                                                <span class="svc-price" x-text="fmt(l.harga)"></span>
+                                                <span class="svc-price" x-text="priceLabel(l)"></span>
                                                 <span class="svc-add"
                                                     x-text="isSelected(l.id) ? '✓ Dipilih' : '+ Pilih'"></span>
                                             </div>
@@ -364,8 +372,8 @@
                                     <button type="button" class="wiz-review-edit" @click="goStep(3)">Ubah</button>
                                 </div>
                                 <template x-for="l in selectedItems()" :key="'r'+l.id">
-                                    <div class="wiz-review-row"><span class="k" x-text="l.nama"></span><span class="v"
-                                            x-text="fmt(l.harga)"></span></div>
+                                    <div class="wiz-review-row"><span class="k" x-text="itemLabel(l)"></span><span class="v"
+                                            x-text="fmt(itemSubtotal(l))"></span></div>
                                 </template>
                             </div>
 
@@ -402,8 +410,8 @@
                                     <div class="wiz-ticket-empty">Belum ada layanan dipilih</div>
                                 </template>
                                 <template x-for="l in selectedItems()" :key="'t'+l.id">
-                                    <div class="wiz-ticket-item"><span class="n" x-text="l.nama"></span><span class="v"
-                                            x-text="fmt(l.harga)"></span></div>
+                                    <div class="wiz-ticket-item"><span class="n" x-text="itemLabel(l)"></span><span class="v"
+                                            x-text="fmt(itemSubtotal(l))"></span></div>
                                 </template>
                             </div>
                             <div class="wiz-ticket-perf"></div>
@@ -425,8 +433,8 @@
             </button>
             <div class="wiz-mbar-detail">
                 <template x-for="l in selectedItems()" :key="'m'+l.id">
-                    <div class="wiz-ticket-item" style="padding:6px 18px;"><span class="n" x-text="l.nama"></span><span
-                            class="v" x-text="fmt(l.harga)"></span></div>
+                    <div class="wiz-ticket-item" style="padding:6px 18px;"><span class="n" x-text="itemLabel(l)"></span><span
+                            class="v" x-text="fmt(itemSubtotal(l))"></span></div>
                 </template>
             </div>
             <div class="wiz-mbar-btns">
@@ -473,7 +481,7 @@
                             <h3 style="font-family:var(--serif);font-size:24px;color:var(--ink);margin:0 0 8px 0;"
                                 x-text="activeModalData ? activeModalData.nama : ''"></h3>
                             <div style="color:var(--goldDeep);font-weight:800;font-size:16px;margin-bottom:20px;"
-                                x-text="activeModalData ? fmt(activeModalData.harga) : ''"></div>
+                                x-text="activeModalData ? priceLabel(activeModalData) : ''"></div>
                             <p style="color:var(--ink3);font-size:14.5px;line-height:1.6;margin:0;white-space:pre-wrap;"
                                 x-text="activeModalData && activeModalData.deskripsi ? activeModalData.deskripsi : 'Belum ada deskripsi detail untuk layanan ini.'">
                             </p>
@@ -518,7 +526,18 @@
                     return this.filter === 'semua' ? list : list.filter(l => l.kategori === this.filter);
                 },
                 selectedItems() { return this.availableLayanan().filter(l => this.selected.includes(l.id)); },
-                total() { return this.selectedItems().reduce((s, l) => s + Number(l.harga), 0); },
+                // Layanan 'per_orang' (mis. Catering): qty = jumlah tamu yang diisi klien.
+                // Layanan 'paket' lainnya: qty selalu 1 (harga tetap, tidak terpengaruh jumlah tamu).
+                itemQty(l) { return l.satuan === 'per_orang' ? (Number(this.jumlah_tamu) || 0) : 1; },
+                itemSubtotal(l) { return Number(l.harga) * this.itemQty(l); },
+                itemLabel(l) {
+                    return l.satuan === 'per_orang' && this.itemQty(l) > 0
+                        ? l.nama + ' (' + this.itemQty(l).toLocaleString('id-ID') + ' orang)'
+                        : l.nama;
+                },
+                priceLabel(l) { return l.satuan === 'per_orang' ? this.fmt(l.harga) + ' / orang' : this.fmt(l.harga); },
+                butuhJumlahTamu() { return this.selectedItems().some(l => l.satuan === 'per_orang'); },
+                total() { return this.selectedItems().reduce((s, l) => s + this.itemSubtotal(l), 0); },
                 fmt(n) { return 'Rp ' + Number(n).toLocaleString('id-ID'); },
                 kategoriLabel(k) {
                     return { paket_wedding: 'Paket Wedding', makeup_only: 'Makeup Only', tambahan: 'Tambahan' }[k] || k;
@@ -538,7 +557,7 @@
                 mobileSummaryOpen: false,
                 jenisAcara: '{{ old('jenis_acara') }}',
                 namaAcara: '{{ old('nama_acara') }}',
-                jumlah_tamu: '{{ old('jumlah_tamu') }}',
+                jumlah_tamu: {{ old('jumlah_tamu') !== null && old('jumlah_tamu') !== '' ? (int) old('jumlah_tamu') : 'null' }},
                 lokasi: '{{ old('lokasi') }}',
                 nama_pria: '{{ old('nama_pria') }}',
                 nama_wanita: '{{ old('nama_wanita') }}',
@@ -553,7 +572,11 @@
                             ? (dasar && !!this.nama_wanita)
                             : (dasar && !!this.namaAcara);
                     }
-                    if (n === 3) return this.selected.length > 0;
+                    if (n === 3) {
+                        if (this.selected.length === 0) return false;
+                        if (this.butuhJumlahTamu() && !this.jumlah_tamu) return false;
+                        return true;
+                    }
                     return true;
                 },
                 stepErrorMsg(n) {
@@ -561,7 +584,11 @@
                     if (n === 2) return this.jenisAcara === 'wedding'
                         ? 'Lengkapi nama mempelai, WhatsApp, tanggal, dan lokasi terlebih dahulu.'
                         : 'Lengkapi nama pemesan, jenis acara, WhatsApp, tanggal, dan lokasi terlebih dahulu.';
-                    if (n === 3) return 'Pilih minimal satu layanan terlebih dahulu.';
+                    if (n === 3) {
+                        if (this.selected.length === 0) return 'Pilih minimal satu layanan terlebih dahulu.';
+                        if (this.butuhJumlahTamu() && !this.jumlah_tamu) return 'Isi Estimasi Jumlah Tamu di langkah "Data & Acara" — wajib diisi karena Anda memilih layanan Catering (harga dihitung per orang).';
+                        return '';
+                    }
                     return '';
                 },
                 goStep(n) {
@@ -590,3 +617,5 @@
         }
     </script>
 @endpush
+
+

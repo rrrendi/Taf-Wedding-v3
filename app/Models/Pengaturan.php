@@ -49,3 +49,6 @@ class Pengaturan extends Model
             ->unique()->sortDesc()->values()->all();
     }
 }
+
+
+

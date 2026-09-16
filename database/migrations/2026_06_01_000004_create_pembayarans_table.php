@@ -15,8 +15,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pembayarans', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('pemesanan_id')->constrained('pemesanans')->cascadeOnDelete();
+            $table->increments('id');
+            $table->unsignedInteger('pemesanan_id');
+            $table->foreign('pemesanan_id')->references('id')->on('pemesanans')->cascadeOnDelete();
             $table->enum('jenis', ['dp', 'pelunasan', 'cicilan'])->default('dp');
             $table->decimal('jumlah', 15, 2);
             $table->string('metode')->nullable();             // BCA / SeaBank / DANA / dll
@@ -34,3 +35,6 @@ return new class extends Migration
         Schema::dropIfExists('pembayarans');
     }
 };
+
+
+

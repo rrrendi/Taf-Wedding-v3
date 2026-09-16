@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@tafwedding.com'],
             [
                 'name'     => 'Waode Trismawati',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('admin123'),
                 'role'     => 'admin',
                 'phone'    => '085794366898',
                 'alamat'   => 'Taman Holis Indah, Cigondewah Rahayu, Bandung',
@@ -32,10 +32,10 @@ class DatabaseSeeder extends Seeder
 
         // 3) Akun Klien contoh.
         $klien = User::updateOrCreate(
-            ['email' => 'klien@example.com'],
+            ['email' => 'user123@gmail.com'],
             [
                 'name'     => 'Rina Pratiwi',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('user1234'),
                 'role'     => 'klien',
                 'phone'    => '081234567890',
             ]
@@ -51,35 +51,35 @@ class DatabaseSeeder extends Seeder
                 'venue' => 'Gedung Serbaguna Bandung', 'phone' => '081234567890',
                 'status' => 'dikonfirmasi', 'bayar' => 'dp', 'user_id' => $klien->id,
                 'layanan' => $L(['Makeup Pengantin', 'Dekorasi', 'Foto & Video', 'Catering']),
-                'tamu' => '300 – 500 orang',
+                'tamu' => 400,
             ],
             [
                 'pria' => 'Budi', 'wanita' => 'Maya', 'tanggal' => '2026-06-28',
                 'venue' => 'Hotel Savoy Homann', 'phone' => '081298765432',
                 'status' => 'dikonfirmasi', 'bayar' => 'lunas', 'user_id' => $admin->id,
                 'layanan' => $L(['Makeup Pengantin', 'Dekorasi', 'Hiburan', 'Foto & Video', 'Upacara Adat', 'Catering', 'Sound System']),
-                'tamu' => '> 500 orang',
+                'tamu' => 600,
             ],
             [
                 'pria' => 'Dimas', 'wanita' => 'Sari', 'tanggal' => '2026-07-12',
                 'venue' => 'Padma Hotel Bandung', 'phone' => '085612345678',
                 'status' => 'pending', 'bayar' => 'belum', 'user_id' => $klien->id,
                 'layanan' => $L(['Makeup Pengantin', 'Dekorasi', 'Foto & Video', 'Catering', 'Siraman', 'Hias Hantaran']),
-                'tamu' => '100 – 300 orang',
+                'tamu' => 200,
             ],
             [
                 'pria' => 'Fajar', 'wanita' => 'Lina', 'tanggal' => '2026-07-26',
                 'venue' => 'Trans Luxury Hotel', 'phone' => '087812345678',
                 'status' => 'dikonfirmasi', 'bayar' => 'dp', 'user_id' => $admin->id,
                 'layanan' => $L(['Makeup Pengantin', 'Dekorasi', 'Hiburan', 'Foto & Video', 'Upacara Adat', 'Catering', 'Sound System', 'Siraman', 'Hias Hantaran']),
-                'tamu' => '> 500 orang',
+                'tamu' => 600,
             ],
             [
                 'pria' => 'Raka', 'wanita' => 'Dewi', 'tanggal' => '2026-08-09',
                 'venue' => 'The Valley Resort Bandung', 'phone' => '089912345678',
                 'status' => 'pending', 'bayar' => 'belum', 'user_id' => $klien->id,
                 'layanan' => $L(['Makeup Pengantin', 'Dekorasi', 'Foto & Video', 'Catering', 'Sound System']),
-                'tamu' => '300 – 500 orang',
+                'tamu' => 400,
             ],
             // Contoh acara Non-Wedding: klien cukup memesan makeup tanpa mengisi data mempelai.
             [
@@ -111,10 +111,13 @@ class DatabaseSeeder extends Seeder
                 'total'         => 0,
             ]);
 
-            // Lampirkan layanan + snapshot harga
+            // Lampirkan layanan + snapshot harga.
+            // Layanan 'per_orang' (Catering): qty mengikuti jumlah tamu, subtotal = harga x qty.
+            // Layanan 'paket' lainnya: qty selalu 1, subtotal = harga.
             $attach = [];
             foreach (Layanan::whereIn('id', $s['layanan'])->get() as $l) {
-                $attach[$l->id] = ['qty' => 1, 'harga' => $l->harga, 'subtotal' => $l->harga];
+                $qty = $l->isPerOrang() ? (int) ($s['tamu'] ?? 1) : 1;
+                $attach[$l->id] = ['qty' => $qty, 'harga' => $l->harga, 'subtotal' => $l->harga * $qty];
             }
             $p->layanans()->attach($attach);
             $p->hitungUlangTotal();
@@ -151,3 +154,5 @@ class DatabaseSeeder extends Seeder
         }
     }
 }
+
+

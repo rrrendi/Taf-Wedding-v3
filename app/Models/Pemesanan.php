@@ -17,6 +17,7 @@ class Pemesanan extends Model
 
     protected $casts = [
         'tanggal_acara' => 'date',
+        'jumlah_tamu'   => 'integer',
         'total'         => 'decimal:2',
     ];
 
@@ -158,3 +159,5 @@ class Pemesanan extends Model
         return 'TW-' . str_pad((string) $next, 4, '0', STR_PAD_LEFT);
     }
 }
+
+

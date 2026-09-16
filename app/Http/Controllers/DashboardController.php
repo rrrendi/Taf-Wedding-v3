@@ -19,3 +19,6 @@ class DashboardController extends Controller
         return redirect()->route('client.pemesanan.index');
     }
 }
+
+
+

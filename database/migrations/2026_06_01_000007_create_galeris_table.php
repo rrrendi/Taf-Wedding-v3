@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('galeris', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('judul');                 // label foto, mis. "Dekorasi Pelaminan"
             $table->string('gambar')->nullable();    // path file di storage (public)
             $table->string('warna')->nullable();     // gradient fallback bila belum ada foto
@@ -24,3 +24,6 @@ return new class extends Migration
         Schema::dropIfExists('galeris');
     }
 };
+
+
+

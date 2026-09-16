@@ -68,3 +68,5 @@ class NotifikasiController extends Controller
         return back()->with('success', 'Pengaturan berhasil disimpan.');
     }
 }
+
+

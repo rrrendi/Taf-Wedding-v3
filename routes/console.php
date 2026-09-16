@@ -14,3 +14,6 @@ use Illuminate\Support\Facades\Schedule;
 | menyentuh kode lagi.
 */
 Schedule::command('wa:reminder')->hourly();
+
+
+

@@ -111,7 +111,7 @@
                     <div class="summary-line"><span class="muted">Jenis Acara</span><span><strong>{{ $pemesanan->jenis_acara_label }}</strong></span></div>
                     <div class="summary-line"><span class="muted">Tanggal</span><span>{{ $pemesanan->tanggal_acara->translatedFormat('l, d M Y') }}</span></div>
                     <div class="summary-line"><span class="muted">Lokasi</span><span style="text-align:right;max-width:62%;">{{ $pemesanan->lokasi }}</span></div>
-                    <div class="summary-line"><span class="muted">Jumlah Tamu</span><span>{{ $pemesanan->jumlah_tamu ?: '—' }}</span></div>
+                    <div class="summary-line"><span class="muted">Jumlah Tamu</span><span>{{ $pemesanan->jumlah_tamu ? number_format($pemesanan->jumlah_tamu, 0, ',', '.') . ' orang' : '—' }}</span></div>
                     <div class="summary-line"><span class="muted">WhatsApp</span><span>{{ $pemesanan->phone }}</span></div>
                     <div class="summary-line"><span class="muted">Email</span><span>{{ $pemesanan->email ?: '—' }}</span></div>
                     @if ($pemesanan->catatan)
@@ -280,3 +280,5 @@
     </div>
 </div>
 @endsection
+
+

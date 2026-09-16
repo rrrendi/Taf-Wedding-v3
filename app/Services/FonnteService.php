@@ -158,3 +158,5 @@ class FonnteService
             . "Tim Taf Wedding sudah bersiap. Mohon balas *\"OK\"* agar kami tahu Kakak sudah membaca pengingat ini. {$penutup}";
     }
 }
+
+

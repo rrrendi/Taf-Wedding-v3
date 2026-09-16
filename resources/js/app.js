@@ -33,3 +33,5 @@ window.tafToast = function (type, message) {
         setTimeout(() => toast.remove(), 300);
     }, 4000);
 };
+
+

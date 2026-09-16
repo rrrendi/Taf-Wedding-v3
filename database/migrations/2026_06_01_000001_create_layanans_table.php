@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('layanans', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('nama');
             $table->string('icon', 16)->default('💍');
             $table->text('deskripsi')->nullable();
@@ -26,3 +26,5 @@ return new class extends Migration
         Schema::dropIfExists('layanans');
     }
 };
+
+

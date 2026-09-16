@@ -9,13 +9,24 @@ use Illuminate\Support\Facades\Storage;
 class Layanan extends Model
 {
     protected $fillable = [
-        'nama', 'icon', 'deskripsi', 'gambar', 'harga', 'kategori', 'is_active',
+        'nama', 'icon', 'deskripsi', 'gambar', 'harga', 'satuan', 'kategori', 'is_active',
     ];
 
     protected $casts = [
         'harga'     => 'decimal:2',
         'is_active' => 'boolean',
     ];
+
+    /** Layanan dengan satuan 'per_orang' dihitung: harga x jumlah_tamu (mis. Catering). */
+    public function isPerOrang(): bool
+    {
+        return $this->satuan === 'per_orang';
+    }
+
+    public function getSatuanLabelAttribute(): string
+    {
+        return $this->satuan === 'per_orang' ? 'Per Orang' : 'Per Paket';
+    }
 
     public function pemesanans(): BelongsToMany
     {
@@ -44,3 +55,5 @@ class Layanan extends Model
         return $this->gambar ? Storage::url($this->gambar) : null;
     }
 }
+
+

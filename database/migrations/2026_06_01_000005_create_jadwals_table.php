@@ -15,8 +15,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('jadwals', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('pemesanan_id')->unique()->constrained('pemesanans')->cascadeOnDelete();
+            $table->increments('id');
+            $table->unsignedInteger('pemesanan_id')->unique();
+            $table->foreign('pemesanan_id')->references('id')->on('pemesanans')->cascadeOnDelete();
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai')->nullable();
             $table->string('keterangan')->nullable();
@@ -31,3 +32,6 @@ return new class extends Migration
         Schema::dropIfExists('jadwals');
     }
 };
+
+
+

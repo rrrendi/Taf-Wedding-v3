@@ -20,3 +20,6 @@ class LandingController extends Controller
         return view('public.landing', compact('layanans', 'galeris'));
     }
 }
+
+
+

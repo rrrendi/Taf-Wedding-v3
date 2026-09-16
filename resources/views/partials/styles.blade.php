@@ -667,3 +667,5 @@ table tbody tr:hover{background:var(--bg2)}
 
 .hd-inner{max-width:1280px;margin:0 auto;padding:0 20px;width:100%}
 </style>
+
+

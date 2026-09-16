@@ -83,3 +83,6 @@ class GaleriController extends Controller
         return back()->with('success', 'Foto galeri dihapus.');
     }
 }
+
+
+

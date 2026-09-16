@@ -34,3 +34,6 @@ class InvoiceController extends Controller
             : $pdf->download($namaFile);    // unduh
     }
 }
+
+
+

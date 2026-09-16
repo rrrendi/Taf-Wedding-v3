@@ -17,3 +17,6 @@ class Galeri extends Model
         'urutan'    => 'integer',
     ];
 }
+
+
+

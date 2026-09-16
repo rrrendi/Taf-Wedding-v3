@@ -69,6 +69,7 @@ class LayananController extends Controller
             'deskripsi' => ['nullable', 'string'],
             'gambar'    => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3048'], // Validasi Gambar Maks 3MB
             'harga'     => ['required', 'numeric', 'min:0'],
+            'satuan'    => ['required', 'in:paket,per_orang'],
             'kategori'  => ['required', 'in:paket_wedding,makeup_only,tambahan'],
         ]);
 
@@ -79,3 +80,5 @@ class LayananController extends Controller
         return $data;
     }
 }
+
+

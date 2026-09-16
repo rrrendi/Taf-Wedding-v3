@@ -18,7 +18,12 @@
                         <tr>
                             <td data-label="Nama"><strong>{{ $l->nama }}</strong><div style="font-size:11.5px;color:var(--muted);margin-top:2px;">{{ Str::limit($l->deskripsi, 50) }}</div></td>
                             <td data-label="Kategori"><span class="badge b-gold">{{ $l->kategori_label }}</span></td>
-                            <td data-label="Harga"><strong>{{ $l->harga_format }}</strong></td>
+                            <td data-label="Harga">
+                                <strong>{{ $l->harga_format }}</strong>
+                                @if ($l->satuan === 'per_orang')
+                                    <div style="font-size:11px;color:var(--muted);">per orang</div>
+                                @endif
+                            </td>
                             <td data-label="Status"><span class="badge {{ $l->is_active ? 'b-green' : 'b-red' }}">{{ $l->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
                             <td data-label="" class="cell-actions">
                                 <div class="flex-gap">
@@ -39,3 +44,6 @@
     </div>
 </div>
 @endsection
+
+
+

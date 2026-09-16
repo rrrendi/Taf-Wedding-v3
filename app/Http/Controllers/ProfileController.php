@@ -60,3 +60,6 @@ class ProfileController extends Controller
         return Redirect::route('landing');
     }
 }
+
+
+

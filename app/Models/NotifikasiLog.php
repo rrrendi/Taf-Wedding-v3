@@ -33,3 +33,6 @@ class NotifikasiLog extends Model
         };
     }
 }
+
+
+
