@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@tafwedding.com'],
             [
                 'name'     => 'Waode Trismawati',
-                'password' => Hash::make('admin123'),
+                'password' => Hash::make('password'),
                 'role'     => 'admin',
                 'phone'    => '085794366898',
                 'alamat'   => 'Taman Holis Indah, Cigondewah Rahayu, Bandung',
@@ -32,10 +32,10 @@ class DatabaseSeeder extends Seeder
 
         // 3) Akun Klien contoh.
         $klien = User::updateOrCreate(
-            ['email' => 'user123@gmail.com'],
+            ['email' => 'klien@example.com'],
             [
                 'name'     => 'Rina Pratiwi',
-                'password' => Hash::make('user1234'),
+                'password' => Hash::make('password'),
                 'role'     => 'klien',
                 'phone'    => '081234567890',
             ]

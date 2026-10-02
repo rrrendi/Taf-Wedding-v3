@@ -264,6 +264,7 @@
     @stack('head')
 </head>
 <body>
+@include('partials.toast')
 @php
     $nav = [
         ['route'=>'admin.dashboard','pattern'=>'admin.dashboard','label'=>'Dashboard',
@@ -349,5 +350,3 @@
 
 </body>
 </html>
-
-

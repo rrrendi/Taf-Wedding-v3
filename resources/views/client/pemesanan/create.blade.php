@@ -64,6 +64,53 @@
             color: var(--ink3);
             line-height: 1.55;
         }
+
+        /* ===== Validasi inline (tampil di dekat field yang bermasalah) ===== */
+        .input.is-invalid {
+            border-color: var(--red, #D64545) !important;
+            background: #FFF7F7;
+            box-shadow: 0 0 0 3px rgba(214, 69, 69, .14);
+        }
+
+        .field-error {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--red, #C0392B);
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        .field-error::before {
+            content: '⚠';
+            font-size: 12px;
+        }
+
+        .box-error {
+            border: 1.5px solid var(--red, #D64545);
+            background: #FFF7F7;
+            color: var(--red, #C0392B);
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .jenis-grid.is-invalid .jenis-card {
+            border-color: var(--red, #D64545);
+        }
+
+        .svc-grid.is-invalid {
+            outline: 2px dashed var(--red, #D64545);
+            outline-offset: 6px;
+            border-radius: 14px;
+        }
+
+        [tabindex="-1"]:focus {
+            outline: none;
+        }
     </style>
 @endpush
 
@@ -132,10 +179,12 @@
                         {{-- STEP 1: JENIS ACARA (Wedding / Non-Wedding) --}}
                         <div class="wiz-panel" x-show="step === 1">
                             <div class="wiz-panel-title">Acara Anda Wedding atau Non-Wedding?</div>
-                            <p class="wiz-panel-desc">Pilih salah satu supaya kami tahu form &amp; layanan yang paling
-                                sesuai. Acara non-wedding tetap bisa memesan layanan Makeup Only &amp; Tambahan.</p>
+                            <p class="wiz-panel-desc">Pilih salah satu supaya kami tahu form yang paling
+                                sesuai. Semua layanan — termasuk Catering, Dekorasi, dan Foto &amp; Video — tetap bisa
+                                dipesan baik untuk acara Wedding maupun Non-Wedding.</p>
 
-                            <div class="jenis-grid">
+                            <div class="jenis-grid" id="f-jenisAcara" tabindex="-1"
+                                :class="{ 'is-invalid': errors.jenisAcara }">
                                 <div class="jenis-card" :class="{ on: jenisAcara === 'wedding' }"
                                     @click="jenisAcara = 'wedding'; filter = 'semua'">
                                     <div class="jenis-ico">
@@ -162,9 +211,11 @@
                                     </div>
                                     <div class="jenis-title">Non-Wedding / Acara Lain</div>
                                     <div class="jenis-desc">Ulang tahun, wisuda, photoshoot, atau acara lainnya — pesan
-                                        layanan Makeup Only &amp; Tambahan sesuai kebutuhan.</div>
+                                        Makeup Only, Tambahan, hingga Catering &amp; Dekorasi sesuai kebutuhan.</div>
                                 </div>
                             </div>
+                            <p class="field-error" style="margin-top:12px;" x-show="errors.jenisAcara"
+                                x-text="errors.jenisAcara"></p>
 
                             <div class="wiz-nav">
                                 <span></span>
@@ -183,13 +234,17 @@
                                 <div class="row">
                                     <div class="field">
                                         <label>Nama Mempelai Pria</label>
-                                        <input class="input" name="nama_pria" x-model="nama_pria"
+                                        <input class="input" id="f-nama_pria" :class="{ 'is-invalid': errors.nama_pria }"
+                                            name="nama_pria" x-model="nama_pria"
                                             placeholder="Contoh: Ahmad Rizky" required>
+                                        <p class="field-error" x-show="errors.nama_pria" x-text="errors.nama_pria"></p>
                                     </div>
                                     <div class="field">
                                         <label>Nama Mempelai Wanita</label>
-                                        <input class="input" name="nama_wanita" x-model="nama_wanita"
+                                        <input class="input" id="f-nama_wanita" :class="{ 'is-invalid': errors.nama_wanita }"
+                                            name="nama_wanita" x-model="nama_wanita"
                                             placeholder="Contoh: Rina Pratiwi" required>
+                                        <p class="field-error" x-show="errors.nama_wanita" x-text="errors.nama_wanita"></p>
                                     </div>
                                 </div>
                             </template>
@@ -197,13 +252,17 @@
                                 <div class="row">
                                     <div class="field">
                                         <label>Nama Pemesan</label>
-                                        <input class="input" name="nama_pria" x-model="nama_pria"
+                                        <input class="input" id="f-nama_pria" :class="{ 'is-invalid': errors.nama_pria }"
+                                            name="nama_pria" x-model="nama_pria"
                                             placeholder="Contoh: Sinta Wulandari" required>
+                                        <p class="field-error" x-show="errors.nama_pria" x-text="errors.nama_pria"></p>
                                     </div>
                                     <div class="field">
                                         <label>Jenis / Nama Acara</label>
-                                        <input class="input" name="nama_acara" x-model="namaAcara" list="jenisAcaraOpsi"
+                                        <input class="input" id="f-namaAcara" :class="{ 'is-invalid': errors.namaAcara }"
+                                            name="nama_acara" x-model="namaAcara" list="jenisAcaraOpsi"
                                             placeholder="Contoh: Ulang Tahun, Wisuda, Photoshoot" required>
+                                        <p class="field-error" x-show="errors.namaAcara" x-text="errors.namaAcara"></p>
                                         <datalist id="jenisAcaraOpsi">
                                             <option value="Ulang Tahun">
                                             <option value="Wisuda / Graduation">
@@ -217,7 +276,9 @@
                             <div class="row">
                                 <div class="field">
                                     <label>No. WhatsApp Aktif</label>
-                                    <input class="input" name="phone" x-model="phone" placeholder="08xxxxxxxxxx" required>
+                                    <input class="input" id="f-phone" :class="{ 'is-invalid': errors.phone }"
+                                        name="phone" x-model="phone" placeholder="08xxxxxxxxxx" required>
+                                    <p class="field-error" x-show="errors.phone" x-text="errors.phone"></p>
                                 </div>
                                 <div class="field">
                                     <label>Email</label>
@@ -228,8 +289,10 @@
                             <div class="row">
                                 <div class="field">
                                     <label>Tanggal Acara</label>
-                                    <input class="input" type="date" name="tanggal_acara" x-model="tanggal"
+                                    <input class="input" id="f-tanggal" :class="{ 'is-invalid': errors.tanggal }"
+                                        type="date" name="tanggal_acara" x-model="tanggal"
                                         @change="cekTanggal" min="{{ date('Y-m-d') }}" required>
+                                    <p class="field-error" x-show="errors.tanggal" x-text="errors.tanggal"></p>
                                     <p class="muted" style="font-size:11.5px;margin-top:6px;">Sistem mengecek ketersediaan
                                         tanggal otomatis.</p>
                                     <p x-show="tanggalTerisi" x-cloak
@@ -238,8 +301,10 @@
                                 </div>
                                 <div class="field">
                                     <label>Estimasi Jumlah Tamu</label>
-                                    <input class="input" type="number" name="jumlah_tamu" x-model.number="jumlah_tamu"
+                                    <input class="input" id="f-jumlah_tamu" :class="{ 'is-invalid': errors.jumlah_tamu }"
+                                        type="number" name="jumlah_tamu" x-model.number="jumlah_tamu"
                                         min="1" step="1" inputmode="numeric" placeholder="Contoh: 300">
+                                    <p class="field-error" x-show="errors.jumlah_tamu" x-text="errors.jumlah_tamu"></p>
                                     <p class="muted" style="font-size:11.5px;margin-top:6px;">Dipakai untuk menghitung
                                         otomatis biaya <strong>Catering</strong> (harga per orang × jumlah tamu). Wajib
                                         diisi bila Anda memilih layanan Catering.</p>
@@ -247,8 +312,10 @@
                             </div>
                             <div class="field" style="margin-bottom:0;">
                                 <label>Lokasi / Gedung Venue</label>
-                                <input class="input" name="lokasi" x-model="lokasi"
+                                <input class="input" id="f-lokasi" :class="{ 'is-invalid': errors.lokasi }"
+                                    name="lokasi" x-model="lokasi"
                                     placeholder="Contoh: Gedung Sate, Bandung / alamat lengkap rumah" required>
+                                <p class="field-error" x-show="errors.lokasi" x-text="errors.lokasi"></p>
                             </div>
 
                             <div class="wiz-nav">
@@ -261,10 +328,12 @@
                         <div class="wiz-panel" x-show="step === 3">
                             <div class="wiz-panel-title">Pilih Layanan</div>
                             <p class="wiz-panel-desc">Ketuk kartu untuk menambahkan. Ketuk ikon <strong
-                                    style="color:var(--goldDeep)">(i)</strong> untuk detail paket.
-                                <template x-if="jenisAcara === 'lainnya'"><span> Khusus acara non-wedding, hanya layanan
-                                        Makeup Only &amp; Tambahan yang ditampilkan.</span></template>
+                                    style="color:var(--goldDeep)">(i)</strong> untuk detail paket. Semua layanan aktif
+                                tersedia untuk acara Wedding maupun Non-Wedding.
                             </p>
+
+                            <div id="f-layanan" tabindex="-1" class="box-error" x-show="errors.layanan"
+                                x-text="errors.layanan"></div>
 
                             <template x-if="butuhJumlahTamu() && !jumlah_tamu">
                                 <div class="alert alert-error" style="margin-bottom:16px;">
@@ -277,7 +346,7 @@
                             <div class="chips" style="margin-bottom:16px;">
                                 <button type="button" class="chip" :class="{ active: filter === 'semua' }"
                                     @click="filter = 'semua'">Semua</button>
-                                <button type="button" class="chip" x-show="jenisAcara !== 'lainnya'"
+                                <button type="button" class="chip"
                                     :class="{ active: filter === 'paket_wedding' }"
                                     @click="filter = 'paket_wedding'">Paket Wedding</button>
                                 <button type="button" class="chip" :class="{ active: filter === 'makeup_only' }"
@@ -286,7 +355,7 @@
                                     @click="filter = 'tambahan'">Tambahan</button>
                             </div>
 
-                            <div class="svc-grid">
+                            <div class="svc-grid" :class="{ 'is-invalid': errors.layanan }">
                                 <template x-for="l in filteredLayanan()" :key="l.id">
                                     <div class="svc-card" :class="{ on: isSelected(l.id) }" @click="toggle(l.id)">
                                         <div class="svc-photo"
@@ -511,15 +580,26 @@
                 activeModalData: null,
                 filter: 'semua',
 
+                // Pesan error per field: { nama_pria: '...', layanan: '...', ... }
+                errors: {},
+
+                init() {
+                    // Pesan error hilang otomatis begitu isian diperbaiki.
+                    ['nama_pria', 'nama_wanita', 'namaAcara', 'phone', 'tanggal', 'lokasi', 'jumlah_tamu']
+                        .forEach(k => this.$watch(k, () => { this.errors[k] = ''; }));
+                    this.$watch('selected', () => { this.errors.layanan = ''; });
+                    this.$watch('jenisAcara', () => { this.errors.jenisAcara = ''; });
+                },
+
                 isSelected(id) { return this.selected.includes(id); },
                 toggle(id) {
                     this.selected = this.isSelected(id) ? this.selected.filter(x => x !== id) : [...this.selected, id];
                 },
                 availableLayanan() {
-                    // Paket Wedding hanya relevan untuk acara Wedding.
-                    return this.jenisAcara === 'lainnya'
-                        ? this.layanan.filter(l => l.kategori !== 'paket_wedding')
-                        : this.layanan;
+                    // Semua layanan aktif tersedia untuk acara apa pun (Wedding maupun Non-Wedding).
+                    // Catering, Dekorasi, dan Foto & Video (kategori 'paket_wedding') tetap logis
+                    // dibutuhkan pada acara non-wedding seperti ulang tahun, wisuda, atau photoshoot.
+                    return this.layanan;
                 },
                 filteredLayanan() {
                     const list = this.availableLayanan();
@@ -564,38 +644,82 @@
                 phone: '{{ old('phone', auth()->user()->phone) }}',
                 email: '{{ old('email', auth()->user()->email) }}',
 
-                stepValid(n) {
-                    if (n === 1) return !!this.jenisAcara;
+                kosong(v) { return v === null || v === undefined || String(v).trim() === ''; },
+
+                // Daftar isian yang belum valid pada langkah n, diurutkan sesuai posisi di layar.
+                // key  = nama field (id elemen = 'f-' + key)
+                // step = langkah tempat field itu berada
+                collectErrors(n) {
+                    const list = [];
+                    if (n === 1 && !this.jenisAcara) {
+                        list.push({ key: 'jenisAcara', step: 1, msg: 'Pilih salah satu: Wedding atau Non-Wedding.' });
+                    }
                     if (n === 2) {
-                        const dasar = !!this.nama_pria && !!this.phone && !!this.tanggal && !!this.lokasi;
-                        return this.jenisAcara === 'wedding'
-                            ? (dasar && !!this.nama_wanita)
-                            : (dasar && !!this.namaAcara);
+                        const wedding = this.jenisAcara === 'wedding';
+                        if (this.kosong(this.nama_pria)) {
+                            list.push({ key: 'nama_pria', step: 2, msg: wedding ? 'Nama mempelai pria wajib diisi.' : 'Nama pemesan wajib diisi.' });
+                        }
+                        if (wedding && this.kosong(this.nama_wanita)) {
+                            list.push({ key: 'nama_wanita', step: 2, msg: 'Nama mempelai wanita wajib diisi.' });
+                        }
+                        if (!wedding && this.kosong(this.namaAcara)) {
+                            list.push({ key: 'namaAcara', step: 2, msg: 'Jenis / nama acara wajib diisi.' });
+                        }
+                        if (this.kosong(this.phone)) {
+                            list.push({ key: 'phone', step: 2, msg: 'No. WhatsApp wajib diisi.' });
+                        }
+                        if (this.kosong(this.tanggal)) {
+                            list.push({ key: 'tanggal', step: 2, msg: 'Tanggal acara wajib diisi.' });
+                        }
+                        if (this.kosong(this.lokasi)) {
+                            list.push({ key: 'lokasi', step: 2, msg: 'Lokasi / gedung venue wajib diisi.' });
+                        }
                     }
                     if (n === 3) {
-                        if (this.selected.length === 0) return false;
-                        if (this.butuhJumlahTamu() && !this.jumlah_tamu) return false;
-                        return true;
+                        if (this.selected.length === 0) {
+                            list.push({ key: 'layanan', step: 3, msg: 'Pilih minimal satu layanan terlebih dahulu.' });
+                        } else if (this.butuhJumlahTamu() && !(Number(this.jumlah_tamu) > 0)) {
+                            // Field-nya ada di langkah 2, jadi pengguna dibawa kembali ke sana.
+                            list.push({ key: 'jumlah_tamu', step: 2, msg: 'Wajib diisi karena Anda memilih layanan Catering (harga dihitung per orang).' });
+                        }
+                    }
+                    return list;
+                },
+
+                // Validasi langkah 1..upTo. Pada langkah pertama yang bermasalah: tampilkan pesan di
+                // bawah field, pindah ke langkah itu, lalu scroll + fokus ke isian pertama yang kosong.
+                validateUpTo(upTo) {
+                    this.errors = {};
+                    for (let n = 1; n <= upTo; n++) {
+                        const list = this.collectErrors(n);
+                        if (list.length) {
+                            this.showErrors(list);
+                            return false;
+                        }
                     }
                     return true;
                 },
-                stepErrorMsg(n) {
-                    if (n === 1) return 'Pilih jenis acara terlebih dahulu (Wedding / Non-Wedding).';
-                    if (n === 2) return this.jenisAcara === 'wedding'
-                        ? 'Lengkapi nama mempelai, WhatsApp, tanggal, dan lokasi terlebih dahulu.'
-                        : 'Lengkapi nama pemesan, jenis acara, WhatsApp, tanggal, dan lokasi terlebih dahulu.';
-                    if (n === 3) {
-                        if (this.selected.length === 0) return 'Pilih minimal satu layanan terlebih dahulu.';
-                        if (this.butuhJumlahTamu() && !this.jumlah_tamu) return 'Isi Estimasi Jumlah Tamu di langkah "Data & Acara" — wajib diisi karena Anda memilih layanan Catering (harga dihitung per orang).';
-                        return '';
-                    }
-                    return '';
+                showErrors(list) {
+                    list.forEach(e => { this.errors[e.key] = e.msg; });
+                    const first = list[0];
+                    this.step = first.step;
+                    this.mobileSummaryOpen = false;
+                    window.tafToast('warn', list.length > 1
+                        ? 'Masih ada ' + list.length + ' isian yang belum lengkap.'
+                        : first.msg);
+                    // Tunggu panel langkah tampil dulu, baru scroll & fokus.
+                    this.$nextTick(() => this.focusField(first.key));
                 },
+                focusField(key) {
+                    const el = document.getElementById('f-' + key);
+                    if (!el) return;
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.focus({ preventScroll: true });
+                },
+
                 goStep(n) {
-                    if (n > this.step && !this.stepValid(this.step)) {
-                        window.tafToast('warn', this.stepErrorMsg(this.step));
-                        return;
-                    }
+                    // Maju ke langkah n: semua langkah sebelumnya harus valid (termasuk saat klik stepper).
+                    if (n > this.step && !this.validateUpTo(n - 1)) return;
                     this.step = n;
                     this.mobileSummaryOpen = false;
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -604,18 +728,9 @@
                 prev() { this.goStep(Math.max(1, this.step - 1)); },
 
                 syncBeforeSubmit(e) {
-                    for (let i = 1; i <= 3; i++) {
-                        if (!this.stepValid(i)) {
-                            e.preventDefault();
-                            this.step = i;
-                            window.tafToast('warn', this.stepErrorMsg(i));
-                            return;
-                        }
-                    }
+                    if (!this.validateUpTo(3)) e.preventDefault();
                 },
             };
         }
     </script>
 @endpush
-
-

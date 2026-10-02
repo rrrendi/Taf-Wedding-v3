@@ -13,6 +13,8 @@
 </head>
 
 <body>
+    @include('partials.toast')
+
     @yield('content')
     @stack('scripts')
 
@@ -60,5 +62,3 @@
 </body>
 
 </html>
-
-

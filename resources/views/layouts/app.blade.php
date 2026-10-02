@@ -12,6 +12,7 @@
 </head>
 
 <body>
+    @include('partials.toast')
     <div style="min-height:100vh;background:var(--bg);">
         {{-- Top bar --}}
         <div
@@ -59,5 +60,3 @@
 </body>
 
 </html>
-
-
